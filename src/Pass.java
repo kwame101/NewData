@@ -1,3 +1,4 @@
+import java.util.List;
 /**
  * Write a description of class System here.
  * 
@@ -55,63 +56,38 @@ public class Pass
             msg ="You can't transit to same station, please try again. \n";
         }
         else { 
-            switch(station1.getStation()){
-                //case of 5th
-                case "5th" : if(station2.getStation().equals("Pelham Parkway")){
-                    fare = Fares.valueOf("ANYWHERE_IN_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Bronx")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_INC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Guns Hill")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_INC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                //case of pelham parkway
-                case "Pelham Parkway": if(station2.getStation().equals("5th")){
-                    fare = Fares.valueOf("ANYWHERE_IN_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Bronx")){
-                    fare = Fares.valueOf("ANY_THREE_ZONES");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Guns Hill")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_INC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                //case of bronx
-                case "Bronx" : if(station2.getStation().equals("5th")){
-                    fare = Fares.valueOf("ANYWHERE_IN_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Pelham Parkway")){
-                    fare = Fares.valueOf("ANY_THREE_ZONES");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Guns Hill")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_EXC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                ///case of guns hill
-                case "Guns Hill" :if(station2.getStation().equals("5th")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_INC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Pelham Parkway")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_INC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                else if(station2.getStation().equals("Bronx")){
-                    fare = Fares.valueOf("ANY_TWO_ZONES_EXC_ZONE_ONE");
-                    return calculateFare(fare,station1,station2);
-                }
-                default: return msg;
-            }
+            fare = checkZoneFare(station1, station2);
+            msg = calculateFare(fare,station1,station2);
         }
         return msg;
+    }
+
+    public Fares checkZoneFare(Station station1,Station station2){
+        List<Integer> checkZones1 = station1.getZones();
+        List<Integer> checkZones2 = station2.getZones();
+        //anywhere in zone 1
+        if(checkZones1.contains(1) && checkZones2.contains(1) || checkZones1.contains(1) && 
+        checkZones1.size() > 1 && checkZones2.contains(1)){
+            return Fares.valueOf("ANYWHERE_IN_ZONE_ONE");
+        }
+        //any one zone outside zone 1
+        else if(checkZones1.containsAll(checkZones2) && checkZones2.size() == 1 &&
+        !checkZones2.contains(1)){
+            return Fares.valueOf("ONE_ZONE_OUTSIDE_ZONE_ONE");
+        }
+        //any two zones including zone 1
+        else if(checkZones2.contains(1) && !checkZones1.contains(1)){
+            return Fares.valueOf("ANY_TWO_ZONES_INC_ZONE_ONE");
+        }
+        //any two zones excluding zone 1
+        else if(!checkZones1.contains(1) && !checkZones2.contains(1)){
+            return Fares.valueOf("ANY_TWO_ZONES_EXC_ZONE_ONE");
+        }
+        //any three zones
+        else if(!checkZones1.containsAll(checkZones2) && checkZones2.size() >=2){
+            return Fares.valueOf("ANY_THREE_ZONES");
+        }
+        return null;
     }
 
     public String calculateFare(Fares fare, Station station1, Station station2)
